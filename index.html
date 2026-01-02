@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annapurna Tiffin Services</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div class="logo_img"><img src="img/logo.png" alt="logo"></div>
+    <a class="login-btn" onclick="openLoginPopup()">Login</a>
+  </div>
+
+  <!-- Header Section -->
+  <div class="header">
+    <h1>Annapurna Tiffin Services</h1>
+    <p>Delicious Home-Cooked Meals Delivered to You</p>
+    <a href="tel:8980994815" class="login-btn">Call Now</a>
+  </div>
+
+  <section class="about-us">
+        <div class="about-text">
+            <h2>About Us</h2>
+            <p>Annapurna Tiffin Services, owned by Vishal Dodiya, offers fresh and healthy homemade meals delivered right to your doorstep. We ensure high-quality food that meets the dietary preferences and tastes of our customers.</p>
+        </div>
+        <div class="about-images">
+            <img src="img/img1.jpg" alt="Food Image 1">
+            <img src="img/img2.jpg" alt="Food Image 2">
+        </div>
+    </section>
+
+  <div class="type">
+    <div id="typedText" class="typing"></div>
+  </div>
+
+  <!-- Gallery Section -->
+  <div id="gallery" class="gallery">
+    <h2>Photo Gallery</h2>
+    <div class="gallery-images" id="gallery-images">
+      <!-- Images will be dynamically added here -->
+       <div style="position: relative;"><img src=""><button>Delete</button></div>
+    </div>
+
+    <!-- Add Image Section for Admin -->
+    <div id="add-image" class="add-image">
+      <input type="file" id="image-upload" accept="image/*" multiple>
+      <button onclick="addImages()">Add Images</button>
+    </div>
+  </div>
+
+  <!-- Login Popup -->
+  <div id="login-popup" class="popup">
+    <div class="popup-content">
+      <h3>Login</h3>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="handleLogin()">Login</button>
+    </div>
+  </div>
+
+  <p class="copyright">© 2026 Annapurna Tiffin Services. All rights reserved.</p>
+
+  <script>
+    // Initialize an empty array to store images
+    let imageGallery = JSON.parse(localStorage.getItem('imageGallery')) || [];
+    let isAdmin = false;  // Track if the user is an admin
+
+    // Open the login popup
+    function openLoginPopup() {
+      document.getElementById('login-popup').style.display = 'flex';
+    }
+
+    // Handle login
+    function handleLogin() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      if (username === 'admin' && password === 'admin') {
+        alert('Login successful');
+        isAdmin = true; // Mark the user as admin
+        document.getElementById('login-popup').style.display = 'none';
+        document.getElementById('add-image').style.display = 'block'; // Show image upload button
+        loadGallery();  // Load gallery from memory
+      } else {
+        alert('Incorrect credentials. Please try again.');
+      }
+    }
+
+    // Load images from localStorage (persistent storage)
+    function loadGallery() {
+      const gallery = document.getElementById('gallery-images');
+      gallery.innerHTML = '';  // Clear the gallery before reloading
+
+      imageGallery.forEach((image, index) => {
+        const imgElement = document.createElement('img');
+        imgElement.src = image;
+
+        // Create delete button but only show it if the user is an admin
+        if (isAdmin) {
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Delete';
+          deleteButton.onclick = () => {
+            deleteImage(index);  // Allow delete if admin
+          };
+          const imgContainer = document.createElement('div');
+          imgContainer.style.position = 'relative';
+          imgContainer.appendChild(imgElement);
+          imgContainer.appendChild(deleteButton);
+          gallery.appendChild(imgContainer);
+        } else {
+          // If the user is not an admin, only display the image without the delete button
+          const imgContainer = document.createElement('div');
+          imgContainer.appendChild(imgElement);
+          gallery.appendChild(imgContainer);
+        }
+      });
+    }
+
+
+    // Add multiple images to the gallery
+    function addImages() {
+      const imageInput = document.getElementById('image-upload');
+      const files = imageInput.files;
+      const maxSize = 500 * 1024; // 500KB
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // Validate file size (500KB)
+        if (file.size > maxSize) {
+          alert(`File ${file.name} is too large. Max size is 500KB.`);
+          continue;  // Skip this file if it exceeds the size limit
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imageGallery.push(e.target.result);  // Store the image in the array
+          localStorage.setItem('imageGallery', JSON.stringify(imageGallery));  // Save to localStorage
+          loadGallery();  // Reload gallery with the new image
+        };
+        reader.readAsDataURL(file);  // Convert the image to base64
+      }
+
+      imageInput.value = '';  // Clear the file input
+    }
+
+    // Delete image from the gallery and localStorage
+    function deleteImage(index) {
+      imageGallery.splice(index, 1);  // Remove image from the array
+      localStorage.setItem('imageGallery', JSON.stringify(imageGallery));  // Update localStorage
+      loadGallery();  // Reload gallery after deletion
+    }
+
+    // Close popup if clicked outside the popup area
+    window.onclick = function(event) {
+      if (event.target === document.getElementById('login-popup')) {
+        document.getElementById('login-popup').style.display = 'none';
+      }
+    }
+
+    // Initial gallery load when the page loads
+    loadGallery();
+
+    const text = "Annapurna Tiffin Services Fresh Homemade Food";
+        const typingSpeed = 150; // Speed of typing (in milliseconds)
+        const erasingSpeed = 100; // Speed of erasing (in milliseconds)
+        const pauseDuration = 1000; // Pause duration before repeating the animation
+        let i = 0;
+        let isTyping = true;
+
+        function typeText() {
+            if (i < text.length && isTyping) {
+                document.getElementById('typedText').textContent += text.charAt(i);
+                i++;
+                setTimeout(typeText, typingSpeed);
+            } else if (i === text.length) {
+                isTyping = false; // Stop typing and start erasing
+                setTimeout(eraseText, pauseDuration);
+            }
+        }
+
+        function eraseText() {
+            if (i > 0 && !isTyping) {
+                document.getElementById('typedText').textContent = text.substring(0, i - 1);
+                i--;
+                setTimeout(eraseText, erasingSpeed);
+            } else if (i === 0) {
+                isTyping = true; // Start typing again
+                setTimeout(typeText, pauseDuration);
+            }
+        }
+
+        // Start typing when the page loads
+        window.onload = function() {
+            typeText();
+        }
+  </script>
+
+</body>
+</html>
